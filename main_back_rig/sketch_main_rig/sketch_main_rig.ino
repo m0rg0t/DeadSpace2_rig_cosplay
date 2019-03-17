@@ -2,6 +2,10 @@
 #include "IRremote.h"
 #include <FastLED.h>
 
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
 Servo myservoLeft;
 Servo myservoRight;
 
@@ -47,6 +51,9 @@ uint16_t yscale = 30;                                         // Wouldn't recomm
 uint8_t maxChanges = 24;    
 
 int current_mode = 0;     
+
+RF24 radio(9, 10); // CE, CSN
+const byte address[6] = "00001";
     
 void setup() {
   // put your setup code here, to run once:
@@ -61,6 +68,11 @@ void setup() {
   set_max_power_in_volts_and_milliamps(5, 500);  
 
   dist = random16(12345);
+
+  radio.begin();
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.stopListening();
 }
 
 void servoslow( Servo num, int pos, int time, int start)  // robotday.ru *** Функция для управления скоростью сервопривода ***
