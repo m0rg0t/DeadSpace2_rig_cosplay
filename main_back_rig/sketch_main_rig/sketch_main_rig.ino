@@ -13,16 +13,7 @@ Servo myservoRight;
 IRrecv irrecv(2); // указываем вывод, к которому подключен приемник
 decode_results results;
 
-//IR codes for remote
-//1 - E318261B
-//2 - 511DBB
-//3 - FFE21D
-//UP - 3D9AE3F7
-//OK - FF38C7 or 488F3CBB
-//DOWN - FF4AB5
-//LEFT - FF10EF or 8C22657B
-//RIGHT - FF5AA5 or 449E79F
-
+//Define IR codes /////////////////////////////
 #define IR2 0x511DBB 
 #define IR2_ALT 0xFF629D
 #define IR3 0xFFE21D
@@ -38,19 +29,21 @@ decode_results results;
 
 #define IRHash 0xFFB04F
 
-
 #define IR1 0xE318261B
 #define IR1_ALT 0xFFA25D
+
 #define IRLeft1 0xFF10EF
 #define IRLeft2 0x8C22657B
+
 #define IRRight1 0xFF5AA5
 #define IRRight2 0x449E79F
+
 #define IROk1 0xFF38C7
 #define IROk2 0x488F3CBB
+//////////////////////////////////////////
 
-
-
-#define NUM_LEDS 15
+//WS LED settings - how many leds and pins
+#define NUM_LEDS 17
 #define DATA_PIN 5
 #define CLOCK_PIN 6
 
@@ -77,20 +70,22 @@ int currentLeft = 0;
 int currentRight = 0;
     
 void setup() {
-  // put your setup code here, to run once:
+  //attach servo to pins
   myservoLeft.attach(4);
   myservoRight.attach(3);
 
   Serial.begin(9600); // выставляем скорость COM порта
   irrecv.enableIRIn(); // запускаем прием
 
+  //ste type of led, it's data pin and led's quantity
   FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN>(leds, NUM_LEDS);
-  /*FastLED.setBrightness(max_bright);
-  set_max_power_in_volts_and_milliamps(5, 500);  */
+  FastLED.setBrightness(max_bright);
+  set_max_power_in_volts_and_milliamps(5, 500);  
 
   dist = random16(12345);
 
-  servoslowDouble(5, 5, 5);  
+  //set start position for servos
+  servoSlowDouble(5, 5, 5);  
 
   /*radio.begin();
   radio.openWritingPipe(address);
@@ -98,7 +93,7 @@ void setup() {
   radio.stopListening();*/
 }
 
-void servoslow( Servo num, int pos, int time, int start)  // robotday.ru *** Функция для управления скоростью сервопривода ***
+void servoSlow( Servo num, int pos, int time, int start)
 {
   num.write(start);
 
@@ -117,8 +112,12 @@ void servoslow( Servo num, int pos, int time, int start)  // robotday.ru *** Ф�
   }
 }
 
-void servoslowDouble(int pos, int time, int start)  //
+/**
+ * 
+ */
+void servoSlowDouble(int pos, int time, int start)  
 {
+  //move position to start
   myservoLeft.write(start);
   myservoRight.write(start);
 
@@ -262,7 +261,7 @@ void loop() {
     switch ( current_mode ) {
       case IROk1:
       case IROk2:
-          servoslowDouble(5, 5, 5);           
+          servoSlowDouble(5, 5, 5);           
           break;
       case IR2:   
       case IR2_ALT:   
@@ -287,24 +286,28 @@ void loop() {
       //left
       case IRLeft1:
       case IRLeft2:
-          servoslowDouble(150, 5, currentRight);
+          servoSlowDouble(150, 5, currentRight);
           break;
       //right          
       case IRRight1:        
       case IRRight2:
-        servoslowDouble(60, 5, currentRight);        
+        servoSlowDouble(60, 5, currentRight);        
         break;
       case IR1:
       case IR1_ALT:
-        servoslowDouble(150, 20, 10);
+        //set brightness to lower brightness position for lower power consumtion
+        //so it wouldn't case problems with both led and servos work
+        FastLED.setBrightness(64); 
+        servoSlowDouble(150, 20, 10);
         delay(1000);
-        servoslowDouble(80, 5, 150);
+        servoSlowDouble(80, 5, 150);
         delay(500);
-        servoslowDouble(10, 10, 80);
+        servoSlowDouble(10, 10, 80);
         delay(500);
-        servoslowDouble(150, 10, 10);
+        servoSlowDouble(150, 10, 10);
         delay(500);
-        servoslowDouble(5, 20, 150);
+        servoSlowDouble(5, 20, 150);
+        FastLED.setBrightness(max_bright); 
         break;
     }     
 
