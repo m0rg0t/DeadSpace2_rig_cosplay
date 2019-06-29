@@ -26,6 +26,8 @@ decode_results results;
 #define IR5 0xFF02FD
 #define IR5_ALT 0xD7E84B1B
 #define IR0 0xFF9867
+#define IR0ALT 0x97483BFB
+
 
 #define IRHash 0xFFB04F
 
@@ -49,6 +51,8 @@ decode_results results;
 
 CRGB leds[NUM_LEDS];
 
+#define DIFF 180
+
 uint8_t max_bright = 128; // Overall brightness definition. It can be changed on the fly.
 
 CRGBPalette16 currentPalette = LavaColors_p;
@@ -68,20 +72,105 @@ const byte address[6] = "00001";
 
 int currentLeft = 0;
 int currentRight = 0;
+bool attached = true;
+
+
+void lightSegment(int segment = 4)
+{
+  FastLED.show();
+  for (int dot = 0; dot < NUM_LEDS; dot++)
+  {
+    leds[dot] = CRGB::Black;
+  }
+  switch (segment)
+  {
+  case 4:
+    leds[7] = CRGB(255, 0, 0);
+    leds[6] = CRGB(255, 0, 0);
+    leds[8] = CRGB(255, 0, 0);
+    break;
+  case 3:
+    leds[7] = CRGB(255, 0, 216);
+    leds[6] = CRGB(255, 0, 216);
+    leds[8] = CRGB(255, 0, 216);
+
+    leds[5] = CRGB(255, 0, 216);
+    leds[9] = CRGB(255, 0, 216);
+    break;
+  case 2:
+    for (int dot = 0; dot < NUM_LEDS; dot++)
+    {
+      leds[dot] = CRGB(0, 255, 0);
+    }
+    break;
+  case 0:
+    break;
+  }
+  
+
+  FastLED.show();
+}
+
+void disableAll() {
+  attached = false;
+  lightSegment(0);
+  deatachServos();
+}
+void enableAll() {
+  attached = true;
+  attachServos();
+}
+
+void runTopToBottomLeds(int speed = 50)
+{
+  for (int dot = 0; dot < NUM_LEDS / 2; dot++)
+  {
+    Serial.println(dot); // печатаем данные
+    if (dot > 1)
+    {
+      leds[dot - 1] = CRGB(0, 255, 0);
+    }
+    leds[dot] = CRGB(0, 150, 150);
+
+    //mirrored leds
+    leds[NUM_LEDS - dot - 1] = CRGB(0, 150, 150);
+    leds[NUM_LEDS - dot] = CRGB(0, 150, 150);
+
+    FastLED.show();
+    // clear this led for the next time around the loop
+
+    leds[NUM_LEDS - dot - 1] = CRGB::Black;
+    leds[NUM_LEDS - dot] = CRGB::Black;
+    delay(speed);
+
+    leds[dot] = CRGB::Black;
+    leds[dot - 1] = CRGB::Black;
+  }
+}
+
 
 void attachServos()
 {
-  myservoLeft.deattach(4);
-  myservoRight.deattach(3);
+  runTopToBottomLeds(10);
+  
+  myservoLeft.attach(4);
+  myservoRight.attach(3);
 
   //set start position for servos
   servoSlowDouble(5, 5, 5);
+  currentLeft = 5;
+  currentRight = 5;
 }
+void deatachServos() {
+  servoSlowDouble(5, 5, 5);
+  runTopToBottomLeds(10);
+  delay(500);
+  lightSegment(0);
+  
+  myservoLeft.detach();
+  myservoRight.detach();
 
-void deattachServos()
-{
-  myservoLeft.attach(4);
-  myservoRight.attach(3);
+  
 }
 
 void setup()
@@ -133,14 +222,14 @@ void servoSlow(Servo num, int pos, int time, int start)
 void servoSlowDouble(int pos, int time, int start)
 {
   //move position to start
-  myservoLeft.write(start);
+  myservoLeft.write(DIFF - start);
   myservoRight.write(start);
 
   if (pos > start)
   {
     for (int i = start; i < pos; i++)
     {
-      myservoLeft.write(i);
+      myservoLeft.write(DIFF -  i);
       myservoRight.write(i);
       delay(time);
     }
@@ -149,7 +238,7 @@ void servoSlowDouble(int pos, int time, int start)
   {
     for (int i = start; i > pos; i--)
     {
-      myservoLeft.write(i);
+      myservoLeft.write(DIFF -  i);
       myservoRight.write(i);
       delay(time);
     }
@@ -198,64 +287,7 @@ void runBottomAndBackLeds(int speed = 50)
   }
 }
 
-void runTopToBottomLeds(int speed = 50)
-{
-  for (int dot = 0; dot < NUM_LEDS / 2; dot++)
-  {
-    Serial.println(dot); // печатаем данные
-    if (dot > 1)
-    {
-      leds[dot - 1] = CRGB(0, 255, 0);
-    }
-    leds[dot] = CRGB(0, 150, 150);
 
-    //mirrored leds
-    leds[NUM_LEDS - dot - 1] = CRGB(0, 150, 150);
-    leds[NUM_LEDS - dot] = CRGB(0, 150, 150);
-
-    FastLED.show();
-    // clear this led for the next time around the loop
-
-    leds[NUM_LEDS - dot - 1] = CRGB::Black;
-    leds[NUM_LEDS - dot] = CRGB::Black;
-    delay(speed);
-
-    leds[dot] = CRGB::Black;
-    leds[dot - 1] = CRGB::Black;
-  }
-}
-
-void lightSegment(int segment = 4)
-{
-  FastLED.show();
-  for (int dot = 0; dot < NUM_LEDS; dot++)
-  {
-    leds[dot] = CRGB::Black;
-  }
-  switch (segment)
-  {
-  case 4:
-    leds[7] = CRGB(255, 0, 0);
-    leds[6] = CRGB(255, 0, 0);
-    leds[8] = CRGB(255, 0, 0);
-    break;
-  case 3:
-    leds[7] = CRGB(255, 0, 216);
-    leds[6] = CRGB(255, 0, 216);
-    leds[8] = CRGB(255, 0, 216);
-
-    leds[5] = CRGB(255, 0, 216);
-    leds[9] = CRGB(255, 0, 216);
-    break;
-  case 2:
-    for (int dot = 0; dot < NUM_LEDS; dot++)
-    {
-      leds[dot] = CRGB(0, 255, 0);
-    }
-  }
-
-  FastLED.show();
-}
 
 void loop()
 {
@@ -285,9 +317,9 @@ void loop()
     irrecv.resume(); //recieve next command (after we finish next actions)
 
     //if we get any command except reset
-    if (current_mode !== IR0) {
+    /*if (current_mode !== IR0) {
       attachServos();
-    }
+    }*/
 
     switch (current_mode)
     {
@@ -313,10 +345,18 @@ void loop()
       lightSegment(2);
       break;
     case IR0:
-      //switch off light
-      lightSegment(0);
-      //deattach servos to lower power consumption
-      deattachServos();
+    case IR0ALT:
+      if (attached) {
+        //attached = false;
+        //switch off light
+        
+        //deattach servos to lower power consumption
+        disableAll();
+      } else {
+        //attached = true;
+        enableAll();
+      }
+      
       break;
     //left
     case IRLeft1:
@@ -330,9 +370,11 @@ void loop()
       break;
     case IR1:
     case IR1_ALT:
+      lightSegment(4);
       //set brightness to lower brightness position for lower power consumtion
       //so it wouldn't case problems with both led and servos work
       FastLED.setBrightness(64);
+      FastLED.show();
       servoSlowDouble(150, 20, 10);
       delay(1000);
       servoSlowDouble(80, 5, 150);
@@ -343,6 +385,7 @@ void loop()
       delay(500);
       servoSlowDouble(5, 20, 150);
       FastLED.setBrightness(max_bright);
+      FastLED.show();
       break;
     }
   }

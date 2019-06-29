@@ -69,12 +69,15 @@ void attachServos()
 
   //set start position for servos
   servoSlowDouble(1, 0, 1);
+  currentLeft = 1;
+  currentRight = 1;
 }
 
 void deatachServos() {
   myservoLeft.detach();
   myservoRight.detach();
 }
+
 #define LED 6
 void setup() {
   digitalWrite(LED, HIGH);
