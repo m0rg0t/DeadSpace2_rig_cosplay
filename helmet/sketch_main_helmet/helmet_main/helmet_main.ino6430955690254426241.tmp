@@ -4,7 +4,7 @@
 #include <FastLED.h>
 
 #include <SPI.h>
-#include <nRF24L01.h>
+//#include <nRF24L01.h>
 #include <RF24.h>
 
 Servo myservoLeft;
@@ -43,9 +43,9 @@ decode_results results;
 //////////////////////////////////////////
 
 //WS LED settings - how many leds and pins
-#define NUM_LEDS 17
-#define DATA_PIN 5
-#define CLOCK_PIN 6
+#define NUM_LEDS 15
+#define DATA_PIN 6
+#define CLOCK_PIN 5
 
 CRGB leds[NUM_LEDS];
 
@@ -61,11 +61,16 @@ int currentRight = 0;
 
 void attachServos()
 {
-  myservoLeft.deattach(4);
-  myservoRight.deattach(3);
+  myservoLeft.attach(3);
+  myservoRight.attach(4);
 
   //set start position for servos
   servoSlowDouble(5, 5, 5);
+}
+
+void deatachServos() {
+  myservoLeft.detach();
+  myservoRight.detach();
 }
     
 void setup() {
@@ -81,7 +86,12 @@ void setup() {
   FastLED.setBrightness(max_bright);
   set_max_power_in_volts_and_milliamps(5, 500);  
 
-  dist = random16(12345);
+  for(int dot = 0; dot < NUM_LEDS; dot++) { 
+    leds[dot] = CRGB( 255, 255, 255);
+  }
+  FastLED.show();
+
+  //dist = random16(12345);
 
   //set start position for servos
   servoSlowDouble(5, 5, 5);  
@@ -208,7 +218,7 @@ void loop() {
           break;
       case IR2:   
       case IR2_ALT:   
-        runBottomAndBackLeds(50);
+        //runBottomAndBackLeds(50);
         break;
       case IR3:   
         //FastLED.show();
@@ -229,19 +239,20 @@ void loop() {
       //left
       case IRLeft1:
       case IRLeft2:
-          servoSlowDouble(150, 5, currentRight);
+          Serial.println("Move left");
+          servoSlowDouble(15, 5, currentRight);
           break;
       //right          
       case IRRight1:        
       case IRRight2:
-        servoSlowDouble(60, 5, currentRight);        
+        servoSlowDouble(30, 5, currentRight);        
         break;
       case IR1:
       case IR1_ALT:
         //set brightness to lower brightness position for lower power consumtion
         //so it wouldn't case problems with both led and servos work
         FastLED.setBrightness(64); 
-        servoSlowDouble(150, 20, 10);
+        /*servoSlowDouble(150, 20, 10);
         delay(1000);
         servoSlowDouble(80, 5, 150);
         delay(500);
@@ -250,7 +261,7 @@ void loop() {
         servoSlowDouble(150, 10, 10);
         delay(500);
         servoSlowDouble(5, 20, 150);
-        FastLED.setBrightness(max_bright); 
+        FastLED.setBrightness(max_bright); */
         break;
     }     
 

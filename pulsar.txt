@@ -1,0 +1,48 @@
+#include "FastLED.h"
+
+// оличество светодиодов
+#define NUM_LEDS 20 
+//---------
+//”правл€ющий пин
+#define DATA_PIN 6
+//---------
+//’« зачем это, осталось от предыдущего проекта
+#define CLOCK_PIN 13
+//---------
+//Ќачальна€ €ркость
+int down = 255;
+//---------
+CRGB leds[NUM_LEDS];
+
+void setup() { 
+	LEDS.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS);
+	LEDS.setBrightness(84);
+}
+void loop() { 
+  //ѕервый блок за 20 циклов уменьшаем €ркость, с задержкой 100 милисекунд
+ 
+ for(int iq = 0; iq < 20; iq++) {
+  for(int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = CHSV( HUE_GREEN, 255, down);
+    FastLED.show(); 
+    delay(1);
+  }
+down = down - 10;
+delay(100);
+  }
+  //ѕауза между блоками в милисекундах
+  delay(1000);
+  //¬торой блок за 20 циклов повышаем €ркость, с задержкой 100 милисекунд
+   for(int iq = 0; iq < 20; iq++) {
+  for(int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = CHSV( HUE_GREEN, 255, down);
+    FastLED.show(); 
+    delay(1);
+  }
+down = down + 10;
+delay(100);
+  }
+ //ѕауза между блоками в милисекундах
+ delay(1000);
+
+}
