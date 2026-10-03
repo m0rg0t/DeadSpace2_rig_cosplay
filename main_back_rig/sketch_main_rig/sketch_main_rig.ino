@@ -134,17 +134,26 @@ void runTopToBottomLeds(int speed = 50)
 
     //mirrored leds
     leds[NUM_LEDS - dot - 1] = CRGB(0, 150, 150);
-    leds[NUM_LEDS - dot] = CRGB(0, 150, 150);
+    if (dot > 0)
+    {
+      leds[NUM_LEDS - dot] = CRGB(0, 150, 150);
+    }
 
     FastLED.show();
     // clear this led for the next time around the loop
 
     leds[NUM_LEDS - dot - 1] = CRGB::Black;
-    leds[NUM_LEDS - dot] = CRGB::Black;
+    if (dot > 0)
+    {
+      leds[NUM_LEDS - dot] = CRGB::Black;
+    }
     delay(speed);
 
     leds[dot] = CRGB::Black;
-    leds[dot - 1] = CRGB::Black;
+    if (dot > 0)
+    {
+      leds[dot - 1] = CRGB::Black;
+    }
   }
 }
 
@@ -273,17 +282,26 @@ void runBottomAndBackLeds(int speed = 50)
 
     //mirrored leds
     leds[NUM_LEDS - dot - 1] = CRGB(0, 150, 150);
-    leds[NUM_LEDS - dot] = CRGB(0, 150, 150);
+    if (dot > 0)
+    {
+      leds[NUM_LEDS - dot] = CRGB(0, 150, 150);
+    }
 
     FastLED.show();
     // clear this led for the next time around the loop
 
     leds[NUM_LEDS - dot - 1] = CRGB::Black;
-    leds[NUM_LEDS - dot] = CRGB::Black;
+    if (dot > 0)
+    {
+      leds[NUM_LEDS - dot] = CRGB::Black;
+    }
     delay(speed);
 
     leds[dot] = CRGB::Black;
-    leds[dot - 1] = CRGB::Black;
+    if (dot > 0)
+    {
+      leds[dot - 1] = CRGB::Black;
+    }
   }
 }
 
